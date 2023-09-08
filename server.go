@@ -18,8 +18,6 @@ func main() {
 	router.HandleFunc("/allAuto", autoService.getAutoArray).Methods("GET")
 	router.HandleFunc("/auto/{id}", autoService.getAuto).Methods("GET")
 	router.HandleFunc("/createAuto", autoService.createAuto).Methods("POST")
-	// r.HandleFunc("/api/books/{id}", updateBook).Methods("PUT")
-	// r.HandleFunc("/api/books/{id}", deleteBook).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
