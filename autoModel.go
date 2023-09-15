@@ -9,3 +9,7 @@ type Auto struct {
 	// модель автомобиля
 	ModelType string `json:"modelType"`
 }
+
+type ErrorMessage struct {
+	Message string `json:"message"`
+}
