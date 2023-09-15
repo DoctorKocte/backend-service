@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -25,19 +26,50 @@ func (a AutoService) getAuto(response http.ResponseWriter, request *http.Request
 	}
 }
 
+func (a AutoService) updateAuto(request http.ResponseWriter, response *http.Request) {
+	request.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(response)
+
+	for index, item := range autoArray {
+		if item.ID == params["id"] {
+			autoArray = append(autoArray[:index], autoArray[index+1:]...)
+
+			var updateAuto Auto
+			_ = json.NewDecoder(response.Body).Decode(&updateAuto)
+			updateAuto.ID = params["id"]
+			autoArray = append(autoArray, updateAuto)
+			json.NewEncoder(request).Encode(autoArray)
+			return
+		}
+	}
+}
+
 func (a AutoService) createAuto(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("Params:", request.URL.Query())
 	response.Header().Set("Content-Type", "application/json")
 	var newAuto Auto
-	newAuto.ID = request.URL.Query().Get("id")
-	newAuto.Number = request.URL.Query().Get("number")
-	newAuto.Model = request.URL.Query().Get("model")
-	newAuto.ModelType = request.URL.Query().Get("modelType")
-	// fmt.Println(request.Body)
-	// params := mux.Vars(request)
-	// _ = json.NewDecoder(request.Body).Decode(&newAuto)
-	// fmt.Println("Auto:", newAuto)
-	// fmt.Fprintf(response, "New Auto: %+v", newAuto)
-	autoArray = append(autoArray, newAuto)
-	json.NewEncoder(response).Encode(newAuto)
+	_ = json.NewDecoder(request.Body).Decode(&newAuto)
+	if len(autoArray) == 0 {
+		newAuto.ID = "1"
+		autoArray = append(autoArray, newAuto)
+		json.NewEncoder(response).Encode(newAuto)
+	} else {
+		var lastID = autoArray[len(autoArray)-1].ID
+		number, _ := strconv.Atoi(lastID)
+		newAuto.ID = fmt.Sprintf("%v", number+1)
+		autoArray = append(autoArray, newAuto)
+		json.NewEncoder(response).Encode(newAuto)
+	}
+}
+
+func (a AutoService) deleteAuto(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(request)
+
+	for index, item := range autoArray {
+		if item.ID == params["id"] {
+			autoArray = append(autoArray[index+1:], autoArray[:index]...)
+			json.NewEncoder(response).Encode(item)
+			return
+		}
+	}
 }
